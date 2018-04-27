@@ -12,7 +12,16 @@ Option Explicit On
 
 
 Partial Public Class SiteMaster
-
+    
+    '''<summary>
+    '''FilterContent control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents FilterContent As Global.System.Web.UI.WebControls.ContentPlaceHolder
+    
     '''<summary>
     '''MainContent control.
     '''</summary>

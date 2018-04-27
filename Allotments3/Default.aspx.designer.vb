@@ -12,4 +12,31 @@ Option Explicit On
 
 
 Partial Public Class _Default
+    
+    '''<summary>
+    '''companyDropDown control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents companyDropDown As Global.System.Web.UI.WebControls.DropDownList
+    
+    '''<summary>
+    '''yearDropDown control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents yearDropDown As Global.System.Web.UI.WebControls.DropDownList
+    
+    '''<summary>
+    '''monthDropDown control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents monthDropDown As Global.System.Web.UI.WebControls.DropDownList
 End Class
