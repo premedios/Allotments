@@ -14,6 +14,15 @@ Option Explicit On
 Partial Public Class _Default
     
     '''<summary>
+    '''Test control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents Test As Global.System.Web.UI.HtmlControls.HtmlGenericControl
+    
+    '''<summary>
     '''companyDropDown control.
     '''</summary>
     '''<remarks>
@@ -39,4 +48,13 @@ Partial Public Class _Default
     '''To modify move field declaration from designer file to code-behind file.
     '''</remarks>
     Protected WithEvents monthDropDown As Global.System.Web.UI.WebControls.DropDownList
+    
+    '''<summary>
+    '''ResultsUpdatePanel control.
+    '''</summary>
+    '''<remarks>
+    '''Auto-generated field.
+    '''To modify move field declaration from designer file to code-behind file.
+    '''</remarks>
+    Protected WithEvents ResultsUpdatePanel As Global.System.Web.UI.UpdatePanel
 End Class

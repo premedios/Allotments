@@ -1,4 +1,4 @@
-﻿<%@ Master Language="VB" AutoEventWireup="true" CodeBehind="Site.master.vb" Inherits="Allotments3.SiteMaster" %>
+﻿<%@ Master Language="VB" AutoEventWireup="true" CodeBehind="Site.master.vb" Inherits="Allotments3.SiteMaster" ViewStateMode="Enabled" %>
 
 <!DOCTYPE html>
 
