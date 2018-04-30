@@ -12,16 +12,12 @@ Public Class _Default
 
     Dim MonthNames As String() = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"}
 
-    Dim sqlWhere As String
-
-    Private SelectedSiteIndex = 0
-    Private SelectedYearIndex = 0
-    Private SelectedMonthIndex = 0
-
     Dim filterContent As ContentPlaceHolder
     Dim mainContent As UpdatePanel
     Dim testContent As HtmlGenericControl
     Dim CompanyDropDownList, YearDropDownList, MonthDropDownList As DropDownList
+
+    Dim results As ResultsFormatter
 
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As EventArgs) Handles Me.Load
@@ -37,110 +33,89 @@ Public Class _Default
         YearDropDownList = filterContent.FindControl("yearDropDown")
         MonthDropDownList = filterContent.FindControl("monthDropDown")
 
-        If Me.ViewState("SelectedSite") IsNot Nothing Then
-            Debug.WriteLine(Me.ViewState("SelectedSite"))
-        End If
-
-        sqlWhere = ""
+        results = New ResultsFormatter(mainContent)
 
         If Not Me.IsPostBack Then
             CompanyDropDownList.Items.Clear()
-            CompanyDropDownList.Items.Add("-- All Sites --")
+            CompanyDropDownList.Items.Add(New ListItem("-- All Sites --", 0))
 
             YearDropDownList.Items.Clear()
-            YearDropDownList.Items.Add("-- All Years --")
+            YearDropDownList.Items.Add(New ListItem("-- All Years --", 0))
 
             MonthDropDownList.Items.Clear()
-            MonthDropDownList.Items.Add("-- All Months --")
+            MonthDropDownList.Items.Add(New ListItem("-- All Months --", 0))
 
             Using mySqlConnection As New MySqlConnection(ConfigurationManager.ConnectionStrings("VTAConnectionString").ConnectionString)
                 mySqlConnection.Open()
 
-                Using cmd = New MySqlCommand("select distinct hotel.nome, allotment.idcontrato from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome")
-                    cmd.Connection = mySqlConnection
-                    Dim result = cmd.ExecuteReader()
-                    If result.HasRows Then
-                        While result.Read()
-                            Dim companyListItem = New ListItem(result("nome"), result("idcontrato"))
-                            CompanyDropDownList.Items.Add(companyListItem)
-                        End While
-                    End If
-                End Using
-
-                Using cmd = New MySqlCommand("select distinct allotment.ano from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY allotment.ano")
-                    cmd.Connection = mySqlConnection
-                    Dim result = cmd.ExecuteReader()
-                    If result.HasRows Then
-                        While result.Read()
-                            YearDropDownList.Items.Add(New ListItem(result("ano"), result("ano")))
-                        End While
-                    End If
-                End Using
-
-                Using cmd = New MySqlCommand("select distinct allotment.mes from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY allotment.mes")
-                    cmd.Connection = mySqlConnection
-                    Dim result = cmd.ExecuteReader()
-                    If result.HasRows Then
-                        While result.Read()
-                            MonthDropDownList.Items.Add(New ListItem(MonthNames(result("mes") - 1), result("mes")))
-                        End While
-                    End If
-                End Using
+                FillDropDownList(mySqlConnection, CompanyDropDownList, {"hotel.nome", "allotment.idcontrato"}, "hotel.nome", {"nome", "idcontrato"})
+                FillDropDownList(mySqlConnection, YearDropDownList, {"allotment.ano"}, "allotment.ano", {"ano", "ano"})
+                FillDropDownList(mySqlConnection, MonthDropDownList, {"allotment.mes"}, "allotment.mes", {"mes", "mes"})
 
                 mySqlConnection.Close()
             End Using
         End If
 
+        results.ShowResults(CompanyDropDownList.SelectedValue, MonthDropDownList.SelectedValue, YearDropDownList.SelectedValue)
 
-        LastCompany = ""
-        LastYear = 0
-        LastMonth = 0
+        'LastCompany = ""
+        'LastYear = 0
+        'LastMonth = 0
 
-        Using mySqlConnection As New MySqlConnection(ConfigurationManager.ConnectionStrings("VTAConnectionString").ConnectionString)
-            mySqlConnection.Open()
+        'Using mySqlConnection As New MySqlConnection(ConfigurationManager.ConnectionStrings("VTAConnectionString").ConnectionString)
+        '    Dim sqlWhere = ""
 
-            If companyDropDown.SelectedIndex <> 0 Then
-                sqlWhere += " and allotment.idcontrato = " + companyDropDown.SelectedValue.ToString
+        '    mySqlConnection.Open()
+
+        '    If CompanyDropDownList.SelectedIndex <> 0 Then
+        '        sqlWhere += " and allotment.idcontrato = @idcontrato"
+        '    End If
+
+        '    If YearDropDownList.SelectedIndex <> 0 Then
+        '        sqlWhere += " and allotment.ano = @ano"
+        '    End If
+
+        '    If MonthDropDownList.SelectedIndex <> 0 Then
+        '        sqlWhere += " and allotment.mes = @mes"
+        '    End If
+
+        '    Dim sqlQuery = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
+
+        '    Using cmd As New MySqlCommand()
+        '        cmd.Connection = mySqlConnection
+        '        cmd.CommandText = sqlQuery
+        '        cmd.Prepare()
+        '        cmd.Parameters.AddWithValue("@idcontrato", CompanyDropDownList.SelectedValue)
+        '        cmd.Parameters.AddWithValue("@ano", YearDropDownList.SelectedValue)
+        '        cmd.Parameters.AddWithValue("@mes", MonthDropDownList.SelectedValue)
+        '        Dim result = cmd.ExecuteReader()
+        '        Debug.WriteLine(result.HasRows.ToString)
+        '        If result.HasRows Then
+        '            While result.Read
+        '                HandleChange(result)
+        '                mainContent.ContentTemplateContainer.Controls.Add(Container)
+        '            End While
+        '        End If
+        '    End Using
+        'End Using
+
+    End Sub
+
+    Protected Sub FillDropDownList(conn As MySqlConnection, DropDownControl As DropDownList, ByVal FieldsList() As String, OrderField As String, ByVal DropDownListValues() As String)
+        Using cmd = New MySqlCommand($"select distinct {String.Join(",", FieldsList)} from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY {OrderField}")
+            Debug.WriteLine(DropDownControl)
+            cmd.Connection = conn
+            Dim result = cmd.ExecuteReader()
+            If result.HasRows Then
+                While result.Read()
+                    If TypeOf result(DropDownListValues(0)) Is Int32 And DropDownControl.ID = "monthDropDown" Then
+                        DropDownControl.Items.Add(New ListItem(MonthNames(result(DropDownListValues(0)) - 1), result(DropDownListValues(1))))
+                    Else
+                        DropDownControl.Items.Add(New ListItem(result(DropDownListValues(0)), result(DropDownListValues(1))))
+                    End If
+                End While
             End If
-
-            If yearDropDown.SelectedIndex <> 0 Then
-                sqlWhere += " and allotment.ano = " + yearDropDown.SelectedValue.ToString
-            End If
-
-            If monthDropDown.SelectedIndex <> 0 Then
-                sqlWhere += " and allotment.mes = " + monthDropDown.SelectedValue.ToString
-            End If
-
-            Debug.WriteLine("select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 " + sqlWhere + " inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome")
-
-            Using cmd As New MySqlCommand("select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 " + sqlWhere + " inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome")
-                cmd.Connection = mySqlConnection
-                Dim result = cmd.ExecuteReader()
-                Debug.WriteLine(result.HasRows.ToString)
-                If result.HasRows Then
-                    While result.Read
-                        HandleChange(result)
-                        mainContent.ContentTemplateContainer.Controls.Add(Container)
-                    End While
-                End If
-            End Using
         End Using
-
-    End Sub
-
-    Protected Sub companyDropDown_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Me.ViewState("SelectedSite") = CompanyDropDownList.SelectedValue
-        testContent.InnerHtml = CompanyDropDownList.SelectedValue
-        Dim container = New HtmlGenericControl("div")
-        mainContent.ContentTemplateContainer.Controls.AddAt(0, container)
-    End Sub
-
-    Protected Sub yearDropDown_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Me.ViewState("SelectedYear") = yearDropDown.SelectedIndex
-    End Sub
-
-    Protected Sub monthDropDown_SelectedIndexChanged(sender As Object, e As EventArgs)
-        Me.ViewState("SelectedMonth") = monthDropDown.SelectedIndex
     End Sub
 
     Private Sub HandleChange(result As MySqlDataReader)
@@ -193,8 +168,6 @@ Public Class _Default
             MonthCardBody.Attributes("class") = "card-body"
             MonthCard.Controls.Add(MonthCardBody)
             YearCardBody.Controls.Add(MonthCard)
-            'YearCard.Controls.Add(YearCardBody)
-            'CompanyCardBody.Controls.Add(YearCard)
 
             DataTable = New Table()
             DataTable.CssClass = "table"
@@ -209,9 +182,6 @@ Public Class _Default
             DataTableRow.Cells.Add(NewTableCell(result("count(inicial)")))
             DataTable.Rows.Add(DataTableRow)
             MonthCardBody.Controls.Add(DataTable)
-            'YearCardBody.Controls.Add(MonthCardBody)
-            'YearCard.Controls.Add(YearCardBody)
-            'CompanyCardBody.Controls.Add(YearCard)
 
         ElseIf result("ano") <> 0 And (LastYear = 0 Or LastYear <> result("ano")) Then
             LastYear = result("ano")
@@ -257,11 +227,7 @@ Public Class _Default
             YearCard.Controls.Add(YearCardBody)
             CompanyCardBody.Controls.Add(YearCard)
         Else
-            DataTableRow = New TableRow
-            DataTableRow.Cells.Add(NewTableCell(Convert.ToDateTime(result("ano").ToString + "/" + result("mes").ToString + "/" + result("dia").ToString).ToShortDateString))
-            DataTableRow.Cells.Add(NewTableCell(result("unit_name")))
-            DataTableRow.Cells.Add(NewTableCell(result("count(inicial)")))
-            DataTable.Rows.Add(DataTableRow)
+            DataTable.Rows.Add(NewTableRow(result))
         End If
 
     End Sub
@@ -275,10 +241,7 @@ Public Class _Default
     Protected Function NewTableRow(resultRow As MySqlDataReader) As TableRow
         Dim tableRow = New TableRow()
 
-        tableRow.Cells.Add(NewTableCell(resultRow("nome")))
-        tableRow.Cells.Add(NewTableCell(resultRow("ano")))
-        tableRow.Cells.Add(NewTableCell(resultRow("mes")))
-        tableRow.Cells.Add(NewTableCell(resultRow("dia")))
+        tableRow.Cells.Add(NewTableCell(Convert.ToDateTime(resultRow("ano").ToString + "/" + resultRow("mes").ToString + "/" + resultRow("dia").ToString).ToShortDateString))
         tableRow.Cells.Add(NewTableCell(resultRow("unit_name")))
         tableRow.Cells.Add(NewTableCell(resultRow("count(inicial)")))
 

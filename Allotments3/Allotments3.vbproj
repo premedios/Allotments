@@ -432,6 +432,10 @@
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Code\ResultsFormatter.vb" />
+    <Compile Include="App_Code\Allotment.vb" />
+    <Compile Include="App_Code\AllotmentViewModel.vb" />
+    <Compile Include="App_Code\ResultsReporter.vb" />
     <Compile Include="App_Start\BundleConfig.vb" />
     <Compile Include="App_Start\RouteConfig.vb" />
     <Compile Include="About.aspx.designer.vb">
