@@ -33,7 +33,7 @@ Public Class _Default
         YearDropDownList = filterContent.FindControl("yearDropDown")
         MonthDropDownList = filterContent.FindControl("monthDropDown")
 
-        results = New ResultsFormatter(mainContent)
+        'results = New ResultsFormatter(mainContent)
 
         If Not Me.IsPostBack Then
             CompanyDropDownList.Items.Clear()
@@ -56,48 +56,48 @@ Public Class _Default
             End Using
         End If
 
-        results.ShowResults(CompanyDropDownList.SelectedValue, MonthDropDownList.SelectedValue, YearDropDownList.SelectedValue)
+        'results.ShowResults(CompanyDropDownList.SelectedValue, MonthDropDownList.SelectedValue, YearDropDownList.SelectedValue)
 
-        'LastCompany = ""
-        'LastYear = 0
-        'LastMonth = 0
+        LastCompany = ""
+        LastYear = 0
+        LastMonth = 0
 
-        'Using mySqlConnection As New MySqlConnection(ConfigurationManager.ConnectionStrings("VTAConnectionString").ConnectionString)
-        '    Dim sqlWhere = ""
+        Using mySqlConnection As New MySqlConnection(ConfigurationManager.ConnectionStrings("VTAConnectionString").ConnectionString)
+            Dim sqlWhere = ""
 
-        '    mySqlConnection.Open()
+            mySqlConnection.Open()
 
-        '    If CompanyDropDownList.SelectedIndex <> 0 Then
-        '        sqlWhere += " and allotment.idcontrato = @idcontrato"
-        '    End If
+            If CompanyDropDownList.SelectedIndex <> 0 Then
+                sqlWhere += " and allotment.idcontrato = @idcontrato"
+            End If
 
-        '    If YearDropDownList.SelectedIndex <> 0 Then
-        '        sqlWhere += " and allotment.ano = @ano"
-        '    End If
+            If YearDropDownList.SelectedIndex <> 0 Then
+                sqlWhere += " and allotment.ano = @ano"
+            End If
 
-        '    If MonthDropDownList.SelectedIndex <> 0 Then
-        '        sqlWhere += " and allotment.mes = @mes"
-        '    End If
+            If MonthDropDownList.SelectedIndex <> 0 Then
+                sqlWhere += " and allotment.mes = @mes"
+            End If
 
-        '    Dim sqlQuery = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
+            Dim sqlQuery = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
 
-        '    Using cmd As New MySqlCommand()
-        '        cmd.Connection = mySqlConnection
-        '        cmd.CommandText = sqlQuery
-        '        cmd.Prepare()
-        '        cmd.Parameters.AddWithValue("@idcontrato", CompanyDropDownList.SelectedValue)
-        '        cmd.Parameters.AddWithValue("@ano", YearDropDownList.SelectedValue)
-        '        cmd.Parameters.AddWithValue("@mes", MonthDropDownList.SelectedValue)
-        '        Dim result = cmd.ExecuteReader()
-        '        Debug.WriteLine(result.HasRows.ToString)
-        '        If result.HasRows Then
-        '            While result.Read
-        '                HandleChange(result)
-        '                mainContent.ContentTemplateContainer.Controls.Add(Container)
-        '            End While
-        '        End If
-        '    End Using
-        'End Using
+            Using cmd As New MySqlCommand()
+                cmd.Connection = mySqlConnection
+                cmd.CommandText = sqlQuery
+                cmd.Prepare()
+                cmd.Parameters.AddWithValue("@idcontrato", CompanyDropDownList.SelectedValue)
+                cmd.Parameters.AddWithValue("@ano", YearDropDownList.SelectedValue)
+                cmd.Parameters.AddWithValue("@mes", MonthDropDownList.SelectedValue)
+                Dim result = cmd.ExecuteReader()
+                Debug.WriteLine(result.HasRows.ToString)
+                If result.HasRows Then
+                    While result.Read
+                        HandleChange(result)
+                        mainContent.ContentTemplateContainer.Controls.Add(Container)
+                    End While
+                End If
+            End Using
+        End Using
 
     End Sub
 
@@ -172,9 +172,10 @@ Public Class _Default
             DataTable = New Table()
             DataTable.CssClass = "table"
             DataTableHeader = New TableHeaderRow()
-            DataTableHeader.Cells.Add(NewTableCell("Date"))
-            DataTableHeader.Cells.Add(NewTableCell("Unit"))
-            DataTableHeader.Cells.Add(NewTableCell("Quantity"))
+            DataTableHeader.CssClass = "thead-dark"
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Date"))
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Unit"))
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Quantity"))
             DataTable.Rows.Add(DataTableHeader)
             DataTableRow = New TableRow
             DataTableRow.Cells.Add(NewTableCell(Convert.ToDateTime(result("ano").ToString + "/" + result("mes").ToString + "/" + result("dia").ToString).ToShortDateString))
@@ -210,22 +211,24 @@ Public Class _Default
             MonthCard.Controls.Add(CardHeader)
             MonthCardBody = New HtmlGenericControl("div")
             MonthCardBody.Attributes("class") = "card-body"
-            MonthCard.Controls.Add(MonthCardBody)
-            YearCardBody.Controls.Add(MonthCard)
-            YearCard.Controls.Add(YearCardBody)
-            CompanyCardBody.Controls.Add(YearCard)
+            'MonthCard.Controls.Add(MonthCardBody)
+            'YearCardBody.Controls.Add(MonthCard)
+            'YearCard.Controls.Add(YearCardBody)
+            'CompanyCardBody.Controls.Add(YearCard)
 
             DataTable = New Table()
             DataTable.CssClass = "table"
             DataTableHeader = New TableHeaderRow()
-            DataTableHeader.Cells.Add(NewTableCell("Date"))
-            DataTableHeader.Cells.Add(NewTableCell("Unit"))
-            DataTableHeader.Cells.Add(NewTableCell("Quantity"))
+            DataTableHeader.CssClass = "thead-dark"
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Date"))
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Unit"))
+            DataTableHeader.Cells.Add(NewTableHeaderCell("Quantity"))
             DataTable.Rows.Add(DataTableHeader)
             MonthCardBody.Controls.Add(DataTable)
-            YearCardBody.Controls.Add(MonthCardBody)
-            YearCard.Controls.Add(YearCardBody)
-            CompanyCardBody.Controls.Add(YearCard)
+            MonthCard.Controls.Add(MonthCardBody)
+            YearCardBody.Controls.Add(MonthCard)
+            'YearCard.Controls.Add(YearCardBody)
+            'CompanyCardBody.Controls.Add(YearCard)
         Else
             DataTable.Rows.Add(NewTableRow(result))
         End If

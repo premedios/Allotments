@@ -26,28 +26,40 @@ Public Class ResultsReporter
 
             mySqlConnection.Open()
 
-            If IdContrato <> 0 Then
-                sqlWhere += " and allotment.idcontrato = @idcontrato"
-            End If
-
-            If Ano <> 0 Then
-                sqlWhere += " and allotment.ano = @ano"
-            End If
-
-            If Mes <> 0 Then
-                sqlWhere += " and allotment.mes = @mes"
-            End If
-
-            Dim sqlQuery = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
-
+            Diagnostics.Debug.WriteLine(IdContrato)
+            Diagnostics.Debug.WriteLine(Ano)
+            Diagnostics.Debug.WriteLine(Mes)
             Using cmd As New MySqlCommand()
                 cmd.Connection = mySqlConnection
-                cmd.CommandText = sqlQuery
+                If IdContrato <> 0 Then
+                    sqlWhere += " and allotment.idcontrato = @idcontrato"
+                End If
+
+                If Ano <> 0 Then
+                    sqlWhere += " and allotment.ano = @ano"
+                End If
+
+                If Mes <> 0 Then
+                    sqlWhere += " and allotment.mes = @mes"
+                End If
+                Dim sqlQuery = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
+                Diagnostics.Debug.WriteLine(sqlQuery)
+                cmd.CommandText = $"select hotel.nome, ano, mes, dia, detalhe.unit_name, count(inicial) from vta_contrato_hotel_allotment allotment inner join vta_contrato_hotel_detalhe detalhe on allotment.idpreco = detalhe.id and allotment.inicial > 0 {sqlWhere} inner join vta_contrato_hotel hotel on hotel.id = allotment.idcontrato group by hotel.nome, ano, mes, dia ORDER BY hotel.nome"
                 cmd.Prepare()
-                cmd.Parameters.AddWithValue("@idcontrato", IdContrato)
-                cmd.Parameters.AddWithValue("@ano", Ano)
-                cmd.Parameters.AddWithValue("@mes", Mes)
+                If IdContrato <> 0 Then
+                    cmd.Parameters.AddWithValue("@idcontrato", IdContrato)
+                    Diagnostics.Debug.WriteLine(cmd.Parameters("@idcontrato").Value)
+                End If
+                If Ano <> 0 Then
+                    cmd.Parameters.AddWithValue("@ano", Ano)
+                    Diagnostics.Debug.WriteLine(cmd.Parameters("@ano").Value)
+                End If
+                If Mes <> 0 Then
+                    cmd.Parameters.AddWithValue("@mes", Mes)
+                    Diagnostics.Debug.WriteLine(cmd.Parameters("@mes").Value)
+                End If
                 Dim result = cmd.ExecuteReader()
+                Diagnostics.Debug.WriteLine(result.HasRows)
                 If result.HasRows Then
                     While result.Read
                         If LastCompany = "" Or LastCompany <> result("nome") Then
